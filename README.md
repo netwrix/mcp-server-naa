@@ -1,4 +1,4 @@
-# MCP Server for Claude Desktop
+# MCP Server for Netwrix Access Analyzer
 
 A FastMCP-based server for Netwrix Access Analyzer data analysis, designed to integrate with Claude Desktop for enhanced data analysis capabilities.
 
@@ -45,10 +45,10 @@ For development or testing purposes only:
 
 ```
 # Database Connection Information
-DB_SERVER=your_server_name    # e.g., 192.168.50.220
-DB_NAME=your_database_name    # e.g., StealthAudit
-DB_USER=your_username         # e.g., sa
-DB_PASSWORD=your_password     # e.g., PASSWORD
+DB_SERVER=your_server_name
+DB_NAME=your_database_name
+DB_USER=your_username
+DB_PASSWORD=your_password
 DB_USE_WINDOWS_AUTH=FALSE     # Set to TRUE to use Windows Authentication
 ```
 
@@ -97,7 +97,7 @@ The MCP server provides the following tools for interacting with database system
 
 ### Database Connection Tools
 
-#### connect_database
+#### Connect-Database
 
 Connect to a MS SQL Server database.
 
@@ -111,7 +111,7 @@ Connect to a MS SQL Server database.
 **Example prompt:**
 "Connect to our SQL Server database at [DBSERVER] with the name [DBNAME] using the [USERNAME] user and [PASSWORD] password."
 
-#### show_connection_status
+#### Show-ConnectionStatus
 
 Check the current database connection status.
 
@@ -120,17 +120,7 @@ Check the current database connection status.
 
 ### Data Query and Schema Tools
 
-#### run_query
-
-Execute a custom SQL query on the connected database.
-
-**Parameters:**
-- `query`: SQL query string
-
-**Example prompt:**
-"Run this SQL query: SELECT TOP 10 * FROM Permissions ORDER BY LastAccessTime DESC"
-
-#### explain_table
+#### Show-TableSchema
 
 Get a detailed explanation of a database table's schema.
 
@@ -140,7 +130,7 @@ Get a detailed explanation of a database table's schema.
 **Example prompt:**
 "Explain the schema of the Permissions table. What columns does it have?"
 
-#### get_table_schema
+#### Get-TableSchema
 
 Retrieves the schema information for a specific table.
 
@@ -150,7 +140,7 @@ Retrieves the schema information for a specific table.
 **Example prompt:**
 "Show me the schema for the Users table."
 
-#### get_table_sample
+#### Get-TableSample
 
 Retrieves a sample of 10 rows from the specified table.
 
@@ -162,14 +152,14 @@ Retrieves a sample of 10 rows from the specified table.
 
 ### Access Analysis Tools
 
-#### get_sensitivedata
+#### Discover-SensitiveData
 
 Identify locations containing sensitive data.
 
 **Example prompt:**
 "Find all shares that contain sensitive data in our environment."
 
-#### get_trustee_access
+#### Get-TrusteeAccess
 
 Identify where a specific user or group has access.
 
@@ -180,7 +170,7 @@ Identify where a specific user or group has access.
 **Example prompt:**
 "Where does DOMAIN\JohnDoe have access in our file systems?"
 
-#### get_permission_source
+#### Get-TrusteePermissionSource
 
 Determine the source of a user's permissions for a specific resource.
 
@@ -191,7 +181,7 @@ Determine the source of a user's permissions for a specific resource.
 **Example prompt:**
 "Why does DOMAIN\JaneDoe have access to \\server\share\folder? What's the source of this permission?"
 
-#### get_resource_access
+#### Get-ResourceAccess
 
 Show who has access to a specific resource.
 
@@ -201,7 +191,7 @@ Show who has access to a specific resource.
 **Example prompt:**
 "Who has access to \\server\finance? Show me all users and groups."
 
-#### get_unused_access
+#### Get-UnusedAccess
 
 Find users with unused access to a specific resource.
 
@@ -211,7 +201,7 @@ Find users with unused access to a specific resource.
 **Example prompt:**
 "Find all users who haven't accessed \\server\hr in the last year."
 
-#### get_shadow_access
+#### Get-ShadowAccess
 
 Find users with shadow access to critical resources.
 
@@ -221,7 +211,7 @@ Find users with shadow access to critical resources.
 
 ### Operational Tools
 
-#### get_running_jobs
+#### Get-RunningJobs
 
 Check currently running Netwrix Access Analyzer jobs.
 
