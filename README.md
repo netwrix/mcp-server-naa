@@ -61,7 +61,7 @@ This MCP Server requires Netwrix Access Analyzer (NAA) File System or Active Dir
 2. **Clone this repository**
    ```sh
    git clone https://github.com/netwrix/mcp-server-naa.git
-   cd <repo-directory>
+   cd mcp-server-naa
    ```
 
 3. **Install Python dependencies**
