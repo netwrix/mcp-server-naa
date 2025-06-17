@@ -97,6 +97,7 @@ This MCP Server requires Netwrix Access Analyzer (NAA) File System or Active Dir
 
 ---
 # Troubleshooting
+
 ## Connection Issues
 
 If you encounter connection issues:
@@ -113,3 +114,7 @@ If Claude Desktop can't find the uv command:
 1. Use the full path to uv in your configuration (use which uv or where uv to find it)
 2. Make sure you've restarted Claude Desktop after configuration changes
 3. Check the Claude logs for any error messages related to the MCP server
+
+## Community
+
+If you need help using this MCP server or understanding your results, just visit the [Netwrix Community](https://community.netwrix.com/) - we’re here to help!
