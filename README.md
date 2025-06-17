@@ -27,28 +27,28 @@ This MCP Server requires Netwrix Access Analyzer (NAA) File System or Active Dir
 
 | Solution         | Tool Name                       | Description |
 |------------------|---------------------------------|-------------|
-| Active Directory | get_ad_effective_group_members  | Discovers effective group membership in AD with filters. |
-| Active Directory | get_ad_exceptions               | Retrieves AD exceptions with optional filters. |
-| Active Directory | get_ad_permissions              | Retrieves AD permissions from the permissions view with filters. |
-| Active Directory | get_domain_controllers          | Lists domain controllers. |
-| Active Directory | get_certificate_vulnerabilities | Lists certificate vulnerabilities. |
-| Active Directory | get_adca_rights                 | Lists AD CA rights. |
-| Active Directory | get_ad_security_assessment      | Retrieves AD security assessment results. |
-| Active Directory | get_ad_users                    | Retrieves AD user details with filters. |
-| Active Directory | get_ad_groups                   | Retrieves AD group details with filters. |
-| Active Directory | get_ad_computers                | Retrieves AD computer details with filters. |
-| Database         | connect_database                | Connects to a specified MSSQL database. |
-| Database         | show_connection_status          | Shows the current DB connection status. |
+| Active Directory | Get-ADEffectiveMembership       | Discovers effective group membership in AD with filters. |
+| Active Directory | Get-ADExceptions                | Retrieves AD exceptions with optional filters. |
+| Active Directory | Get-ADPermissions               | Retrieves AD permissions from the permissions view with filters. |
+| Active Directory | Get-DomainControllers           | Lists domain controllers. |
+| Active Directory | Get-CertificateVulnerabilities  | Lists certificate vulnerabilities. |
+| Active Directory | Get-ADCARights                  | Lists AD CA rights. |
+| Active Directory | Get-ADSecurityAssessment        | Retrieves AD security assessment results. |
+| Active Directory | Get-ADUsers                     | Retrieves AD user details with filters. |
+| Active Directory | Get-ADGroups                    | Retrieves AD group details with filters. |
+| Active Directory | Get-ADComputers                 | Retrieves AD computer details with filters. |
+| Database         | Connect-Database                | Connects to a specified MSSQL database. |
+| Database         | Show-ConnectionStatus           | Shows the current DB connection status. |
 | Database         | run_query                       | Runs an arbitrary SQL query. |
-| Database         | show_table_schema               | Shows the schema for a given table. |
-| Database         | get_table_schema                | Alias for show_table_schema. |
-| Database         | get_table_sample                | Gets a sample of rows from a table. |
-| File System      | discover_sensitive_data         | Discovers where sensitive data exists (DLP matches). |
-| File System      | get_open_shares                 | Finds open shares accessible to broad groups. |
-| File System      | get_trustee_access              | Finds resources where a trustee has access. |
-| File System      | get_permission_source           | Finds the source of access for a trustee/resource. |
-| File System      | get_resource_access             | Gets effective access for a resource path. |
-| File System      | get_unused_access               | Finds users with unused access to a share. |
+| Database         | Show-TableSchema                | Shows the schema for a given table. |
+| Database         | Get-TableSchema                 | Alias for Show-TableSchema. |
+| Database         | Sample-Table                    | Gets a sample of rows from a table. |
+| File System      | Discover-SensitiveData          | Discovers where sensitive data exists (DLP matches). |
+| File System      | Get-OpenShares                  | Finds open shares accessible to broad groups. |
+| File System      | Get-TrusteeAccess               | Finds resources where a trustee has access. |
+| File System      | Get-TrusteePermissionSource     | Finds the source of access for a trustee/resource. |
+| File System      | Get-ResourceAccess              | Gets effective access for a resource path. |
+| File System      | Get-UnusedAccess                | Finds users with unused access to a share. |
 | File System      | Get-RunningJobs                 | Lists running Netwrix Access Auditor jobs. |
 | File System      | Get-ShadowAccess                | Retrieves details about shadow access. |
 
