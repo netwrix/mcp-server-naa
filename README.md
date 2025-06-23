@@ -55,7 +55,7 @@ This MCP Server requires Netwrix Access Analyzer (NAA) File System or Active Dir
 ## Installation Instructions (Claude Desktop)
 
 1. **Install Claude Desktop**
-   - Download and install Claude Desktop from the official website: https://claude.ai/desktop
+   - Download and install Claude Desktop from the official website: https://claude.ai/download
    - Follow the installation prompts for your operating system (macOS, Windows, or Linux).
 
 2. **Clone this repository**
