@@ -39,7 +39,6 @@ This MCP Server requires Netwrix Access Analyzer (NAA) File System or Active Dir
 | Active Directory | Get-ADComputers                 | Retrieves AD computer details with filters. |
 | Database         | Connect-Database                | Connects to a specified MSSQL database. |
 | Database         | Show-ConnectionStatus           | Shows the current DB connection status. |
-| Database         | run_query                       | Runs an arbitrary SQL query. |
 | Database         | Show-TableSchema                | Shows the schema for a given table. |
 | Database         | Get-TableSchema                 | Alias for Show-TableSchema. |
 | Database         | Sample-Table                    | Gets a sample of rows from a table. |
@@ -64,23 +63,18 @@ This MCP Server requires Netwrix Access Analyzer (NAA) File System or Active Dir
    cd mcp-server-naa
    ```
 
-3. **Install Python dependencies**
-   ```sh
-   uv sync
-   ```
-
-4. **Connect Claude Desktop to this Server**
-   - Add the following configuration to your Claude Desktop MCP Configuration:
+3. **Connect Claude Desktop to this Server**
+   - Add the following [`uv`](https://docs.astral.sh/uv/getting-started/installation/) configuration to your Claude Desktop MCP Configuration:
     ```
     "NAA_AD": {
-      "command": "/Users/berg/.local/bin/uv",
+      "command": "/path/to/uv",
       "args": [
         "run",
         "--with",
-        "pyodbc, fastmcp",
+        "pyodbc",
         "fastmcp",
         "run",
-        "/path/to/run.py"
+        "/path/to/mcp-server-naa/run.py"
       ],
       "env": {
         "DB_SERVER": "HOST OR IP",
@@ -92,8 +86,6 @@ This MCP Server requires Netwrix Access Analyzer (NAA) File System or Active Dir
     }
     ```
 ---
-
-
 
 ---
 # Troubleshooting
