@@ -99,7 +99,7 @@ def get_trustee_access(trustee: str, levels_down: int = 0) -> str:
     # Parameterize inputs to prevent SQL injection
     if not trustee or '\\' not in trustee:
         return "Invalid trustee format. Use Domain\\Name."
-    if not isinstance(levels_down, int) or levels_down < 0:
+    if levels_down < 0:
         return "Levels down must be a non-negative integer."
 
     # Use parameterized query
@@ -314,12 +314,9 @@ def get_unused_access(resource_path: str, days_inactive: int = 90) -> str:
     # Parameterize inputs
     if not resource_path or not (resource_path.startswith('\\\\') or resource_path.startswith('//')):
         return "Invalid resource path format. Use UNC path (e.g., \\\\server\\share)."
-    if not isinstance(days_inactive, int) or days_inactive <= 0:
-         return "Days inactive must be a positive integer."
+    if days_inactive <= 0:
+        return "Days inactive must be a positive integer."
 
-    # Note: The original query compared activity date with GETUTCDATE() - 90.
-    # Using GETUTCDATE() assumes the SQL Server's clock is UTC. If not, adjust accordingly.
-    # Parameterizing the date calculation is safer.
     query = """
     -- Find the target share details
     WITH TargetShare AS (

@@ -11,12 +11,40 @@ logger = get_logger(__name__)
 def connect_database(server: str, database_name: str, username: Optional[str] = None,
                      password: Optional[str] = None, trusted_connection: bool = False) -> str:
     """Connects to a specified MSSQL database server, overriding environment settings."""
+    from ..config import settings
+    
     logger.info(f"Tool 'Connect-Database' called for {server}/{database_name}")
-    if database.connect_with_details(server, database_name, username, password, trusted_connection):
-        return f"Successfully connected to the database {database_name} on {server}."
-    else:
-        # More detailed error might be in logs
-        return "Failed to connect to the database. Check logs for details."
+    
+    # Close existing connection first
+    database.close_connection()
+    
+    # Store original settings
+    original_server = settings.DB_SERVER
+    original_db_name = settings.DB_NAME
+    original_user = settings.DB_USER
+    original_password = settings.DB_PASSWORD
+    original_windows_auth = settings.DB_USE_WINDOWS_AUTH
+    
+    try:
+        # Temporarily override settings
+        settings.DB_SERVER = server
+        settings.DB_NAME = database_name
+        settings.DB_USER = username
+        settings.DB_PASSWORD = password
+        settings.DB_USE_WINDOWS_AUTH = trusted_connection
+        
+        # Use the standard connect() function
+        if database.connect():
+            return f"Successfully connected to the database {database_name} on {server}."
+        else:
+            return "Failed to connect to the database. Check logs for details."
+    finally:
+        # Restore original settings
+        settings.DB_SERVER = original_server
+        settings.DB_NAME = original_db_name
+        settings.DB_USER = original_user
+        settings.DB_PASSWORD = original_password
+        settings.DB_USE_WINDOWS_AUTH = original_windows_auth
 
 @app.mcp_agent.tool("Show-ConnectionStatus")
 def show_connection_status() -> str:
@@ -181,57 +209,3 @@ def get_table_schema(table_name: str) -> str:
     """Alias for Show-TableSchema. Provides the schema for a given table."""
     # This just calls the other tool function directly.
     return explain_table(table_name)
-
-
-@app.mcp_agent.tool("Sample-Table")
-def get_table_sample(table_name: str, rows: int = 10) -> str:
-    """Gets a sample number of rows (default 10) from the specified table."""
-    logger.info(f"Tool 'Sample-Table' called for table: {table_name}, rows: {rows}")
-
-    if not isinstance(rows, int) or rows < 1:
-        return "Number of rows must be a positive integer."
-
-    # Basic validation - Parameterize table name is tricky in SELECT * FROM ?,
-    # so we sanitize carefully. Be very cautious here.
-    # Allow alphanumeric and underscores. Reject others.
-    if not table_name or not all(c.isalnum() or c == '_' for c in table_name):
-         return f"Invalid table name format: {table_name}. Only alphanumeric and underscores allowed."
-
-    # Construct query safely using the validated table name
-    # Use f-string ONLY after validation. Parameterize 'rows' count.
-    # Note: TOP clause syntax might differ slightly in older SQL Server versions
-    query = f"SELECT TOP (?) * FROM {table_name};" # Parameterize row count
-
-    conn = database.get_connection()
-    if not conn:
-        return "Not connected to a database. Please connect first."
-
-    try:
-        result_rows, columns, _ = database.execute_query(query, (rows,))
-        if not columns:
-            # Check if the table actually exists if no columns are returned
-             table_check_query = """
-             SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES
-             WHERE TABLE_SCHEMA = SCHEMA_NAME() AND TABLE_NAME = ? AND TABLE_TYPE = 'BASE TABLE'
-             """
-             exists_rows, _, _ = database.execute_query(table_check_query, (table_name,))
-             if not exists_rows or exists_rows[0][0] == 0:
-                 return f"Table '{table_name}' does not exist or is not accessible."
-             else:
-                 return f"Table '{table_name}' exists but appears to have no columns or data." # Or maybe query failed silently?
-
-        return database.format_results(result_rows, columns)
-
-    except RuntimeError as e:
-        logger.warning(f"Sample table failed: {e}")
-        return str(e)
-    except pyodbc.Error as e:
-        logger.error(f"Error sampling table '{table_name}': {e}", exc_info=True)
-        sqlstate = e.args[0] if e.args else 'N/A'
-        # Check for common errors like invalid object name
-        if 'Invalid object name' in str(e):
-             return f"Error sampling table: Table '{table_name}' not found or invalid (SQLSTATE: {sqlstate})."
-        return f"Error sampling table (SQLSTATE: {sqlstate}): {str(e)}"
-    except Exception as e:
-        logger.error(f"Unexpected error sampling table '{table_name}': {e}", exc_info=True)
-        return f"Unexpected error sampling table: {str(e)}"

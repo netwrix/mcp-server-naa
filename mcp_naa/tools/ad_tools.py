@@ -643,7 +643,6 @@ def get_ad_users(
     logger.debug(f"Query parameters: {tuple(params)}")
 
     try:
-        # Execute the potentially parameterized query
         rows, columns, _ = database.execute_query(final_query, tuple(params))
 
         if not rows:

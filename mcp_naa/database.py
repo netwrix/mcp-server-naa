@@ -87,60 +87,96 @@ def get_query_fingerprint(query: str, max_length: int = 150) -> str:
     return sanitize_for_logging(fingerprint, max_length)
 
 
-def connect() -> bool:
+def connect(server: Optional[str] = None, database: Optional[str] = None, 
+           username: Optional[str] = None, password: Optional[str] = None, 
+           trusted_connection: Optional[bool] = None, TrustServerCertificate: bool = False) -> bool:
     """
-    Connects to the MSSQL database using configuration settings.
-    Returns True on success. Raises JsonRpcDBError subclasses on failure.
-    SECURITY: Avoids logging sensitive credentials.
+    Connects to the MSSQL database using either provided parameters or configuration settings.
+    
+    Args:
+        server: Database server address (overrides settings.DB_SERVER if provided)
+        database: Database name (overrides settings.DB_NAME if provided)
+        username: Database username (overrides settings.DB_USER if provided)
+        password: Database password (overrides settings.DB_PASSWORD if provided)
+        trusted_connection: Use Windows Authentication (overrides settings.DB_USE_WINDOWS_AUTH if provided)
+        TrustServerCertificate: Whether to trust the server certificate (overrides settings.DB_TRUST_SERVER_CERTIFICATE if provided)
+        
+    Returns:
+        bool: True on success, raises JsonRpcDBError subclasses on failure.
+        
+    Raises:
+        DBConfigurationError: If required configuration is missing
+        DBConnectionError: If connection to the database fails
+        DBUnexpectedError: For unexpected errors during connection
     """
     global _db_connection
     if _db_connection:
         logger.info("Already connected to the database.")
         return True
 
+    # Use provided parameters or fall back to settings
+    server = server or settings.DB_SERVER
+    database_name = database or settings.DB_NAME
+    trust_server_certificate = TrustServerCertificate or settings.DB_TRUST_SERVER_CERTIFICATE
+    
     # --- Configuration Validation ---
-    if not settings.DB_SERVER or not settings.DB_NAME:
+    if not server or not database_name:
         err_msg = "Database connection failed due to missing configuration (server or database name)."
-        log_issue = "DB_SERVER or DB_NAME is not configured."
+        log_issue = "DB_SERVER/DB_NAME not configured and no server/database provided."
         logger.error(f"Configuration Error: {log_issue}. Raising DBConfigurationError.")
         raise DBConfigurationError(err_msg, config_issue=log_issue)
 
     # Sanitize server and database names for logging
-    safe_server = sanitize_for_logging(settings.DB_SERVER, 100)
-    safe_db_name = sanitize_for_logging(settings.DB_NAME, 100)
+    safe_server = sanitize_for_logging(server, 100)
+    safe_db_name = sanitize_for_logging(database_name, 100)
     
-    auth_method = "Windows Authentication" if settings.DB_USE_WINDOWS_AUTH else "SQL Server Authentication"
+    # Determine authentication method
+    use_windows_auth = trusted_connection if trusted_connection is not None else settings.DB_USE_WINDOWS_AUTH
+    auth_method = "Windows Authentication" if use_windows_auth else "SQL Server Authentication"
     logger.info(f"Attempting to connect to MSSQL server: {safe_server}, database: {safe_db_name} using {auth_method}")
 
     try:
         connection_string_parts = [
             "DRIVER={ODBC Driver 17 for SQL Server}",
-            f"SERVER={settings.DB_SERVER}",
-            f"DATABASE={settings.DB_NAME}",
+            f"SERVER={server}",
+            f"DATABASE={database_name}",
             "Timeout=30"
         ]
 
-        if settings.DB_USE_WINDOWS_AUTH:
+        # Add TrustServerCertificate if needed
+        if trust_server_certificate:
+            connection_string_parts.append("TrustServerCertificate=yes")
+
+        if use_windows_auth:
             connection_string_parts.append("Trusted_Connection=yes")
-            logger.info("Using Trusted Connection (Windows Authentication)")
+            logger.info("Using Windows Authentication")
         else:
-            if settings.DB_USER and settings.DB_PASSWORD:
-                connection_string_parts.append(f"UID={settings.DB_USER}")
-                connection_string_parts.append("PWD=...") # Placeholder for logging
+            # Get credentials from parameters or settings
+            db_user = username or settings.DB_USER
+            db_password = password or settings.DB_PASSWORD
+            
+            if db_user and db_password:
+                connection_string_parts.append(f"UID={db_user}")
+                connection_string_parts.append("PWD=...")  # Placeholder for logging
                 
                 # Sanitize username for logging
-                safe_user = sanitize_for_logging(settings.DB_USER, 50)
-                logger.info(f"Using SQL Login. User: {safe_user}. Password: [REDACTED]")
+                safe_username = sanitize_for_logging(db_user, 50)
+                logger.info(f"Using SQL Login. User: {safe_username}. Password: [REDACTED]")
+                
+                # Build final connection string with actual password
+                final_connection_string = ";".join(connection_string_parts).replace(
+                    "PWD=...", f"PWD={db_password}")
             else:
                 err_msg = "Database connection failed. Username and password are required for SQL Server Authentication."
-                log_issue = "DB_USER or DB_PASSWORD missing for SQL Server Authentication."
+                log_issue = "Username or password missing for SQL Server Authentication."
                 logger.error(f"Configuration Error: {log_issue}. Raising DBConfigurationError.")
                 raise DBConfigurationError(err_msg, config_issue=log_issue)
-
-        final_connection_string = ";".join(connection_string_parts).replace("PWD=...", f"PWD={settings.DB_PASSWORD}" if not settings.DB_USE_WINDOWS_AUTH else "PWD=")
-
+        
+        # For Windows Auth, we can build the connection string directly
+        if use_windows_auth:
+            final_connection_string = ";".join(connection_string_parts)
+            
         _db_connection = pyodbc.connect(final_connection_string, autocommit=False)
-
         logger.info(f"Successfully connected to MSSQL server: {safe_server}, database: {safe_db_name}")
         return True
 
@@ -167,80 +203,6 @@ def connect() -> bool:
         )
         logger.error(f"{unexpected_error.get_log_message()} Raising DBUnexpectedError.", exc_info=False)
         raise unexpected_error
-
-
-def connect_with_details(server: str, database: str, username: Optional[str] = None,
-                         password: Optional[str] = None, trusted_connection: bool = False) -> bool:
-    """
-    Connects to a specific MSSQL server, overriding environment settings.
-    Used by the Connect-Database tool. Handles credentials securely.
-    Returns True on success. Raises JsonRpcDBError subclasses on failure.
-    """
-    global _db_connection
-    close_connection() # Close existing connection if any
-
-    # Sanitize inputs for logging
-    safe_server = sanitize_for_logging(server, 100)
-    safe_database = sanitize_for_logging(database, 100)
-    
-    auth_method = "Windows Authentication" if trusted_connection else "SQL Server Authentication"
-    logger.info(f"Attempting explicit connection to MSSQL server: {safe_server}, database: {safe_database} using {auth_method}")
-
-    try:
-        connection_string_parts = [
-            "DRIVER={ODBC Driver 17 for SQL Server}",
-            f"SERVER={server}",
-            f"DATABASE={database}",
-            "Timeout=30"
-        ]
-
-        if trusted_connection:
-            connection_string_parts.append("Trusted_Connection=yes")
-            logger.info("Using Trusted Connection for explicit connection.")
-        else:
-            if username and password:
-                connection_string_parts.append(f"UID={username}")
-                connection_string_parts.append("PWD=...") # Placeholder for logging
-                
-                # Sanitize username for logging
-                safe_username = sanitize_for_logging(username, 50)
-                logger.info(f"Using SQL Login for explicit connection. User: {safe_username}. Password: [REDACTED]")
-            else:
-                err_msg = "Explicit database connection failed. Username and password required for SQL Server Authentication."
-                log_issue = "Username or password missing for explicit non-trusted connection."
-                logger.error(f"Configuration Error: {log_issue}. Raising DBConfigurationError.")
-                raise DBConfigurationError(err_msg, config_issue=log_issue)
-
-        final_connection_string = ";".join(connection_string_parts).replace("PWD=...", f"PWD={password}" if not trusted_connection else "PWD=")
-
-        _db_connection = pyodbc.connect(final_connection_string, autocommit=False)
-        logger.info(f"Successfully connected explicitly to MSSQL server: {safe_server}, database: {safe_database}")
-        return True
-
-    except pyodbc.Error as e:
-        _db_connection = None
-        client_err_msg = f"Failed to connect explicitly to the database server."
-        db_conn_error = DBConnectionError(
-            client_message=client_err_msg,
-            server=server,
-            db_name=database,
-            original_exception=e
-        )
-        logger.error(f"{db_conn_error.get_log_message()} Raising DBConnectionError.", exc_info=False)
-        raise db_conn_error
-    except DBConfigurationError: # Re-raise config errors directly
-         raise
-    except Exception as e:
-        _db_connection = None
-        client_err_msg = "An unexpected error occurred during explicit database connection."
-        unexpected_error = DBUnexpectedError(
-            client_message=client_err_msg,
-            context="Explicit database connection attempt",
-            original_exception=e
-        )
-        logger.error(f"{unexpected_error.get_log_message()} Raising DBUnexpectedError.", exc_info=False)
-        raise unexpected_error
-
 
 def close_connection():
     """Closes the database connection if it's open. Handles potential errors during close."""

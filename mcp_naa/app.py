@@ -21,7 +21,7 @@ logger.info("Tools registered.")
 
 # --- Initial DB Connection Attempt ---
 def initialize_database_on_startup():
-    # ... (keep the function as defined before) ...
+
     if config.settings.DB_SERVER and config.settings.DB_NAME:
         logger.info("Attempting initial database connection from environment variables...")
         if database.connect():
