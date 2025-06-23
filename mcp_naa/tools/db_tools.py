@@ -74,7 +74,6 @@ def run_query(query: str) -> str:
     For SELECT statements, returns formatted results.
     For DML statements (INSERT, UPDATE, DELETE), commits changes and returns rows affected.
     """
-    logger.info(f"Tool 'run_query' called.")
     conn = database.get_connection()
     if not conn:
         return "Not connected to a database. Please connect first using Connect-Database."
