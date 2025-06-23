@@ -58,15 +58,15 @@ def show_connection_status() -> str:
             cursor.fetchone()
             cursor.close()
             # Could fetch server/db name from connection info if needed
-            return f"Connected to database." # Add server/db details if available easily
+            return "Connected to database." # Add server/db details if available easily
         except pyodbc.Error as e:
             logger.warning(f"Connection test failed: {e}")
-            return f"Connection appears stale or broken. Error: {e}. Please reconnect."
+            return "Connection appears stale or broken. Please reconnect."
         except Exception as e:
              logger.warning(f"Unexpected error checking connection: {e}")
-             return f"Error checking connection status: {e}"
+             return "Error checking connection status."
     else:
-        return "Not connected to a database. Use Connect-Database or ensure .env is configured."
+        return "Not connected to a database. Please connect first."
 
 def run_query(query: str) -> str:
     """
