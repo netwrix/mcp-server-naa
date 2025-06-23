@@ -68,7 +68,6 @@ def show_connection_status() -> str:
     else:
         return "Not connected to a database. Use Connect-Database or ensure .env is configured."
 
-@app.mcp_agent.tool()
 def run_query(query: str) -> str:
     """
     Runs an arbitrary SQL query against the connected database.
