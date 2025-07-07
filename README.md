@@ -40,8 +40,6 @@ This MCP Server requires Netwrix Access Analyzer (NAA) File System or Active Dir
 | Database         | Connect-Database                | Connects to a specified MSSQL database. |
 | Database         | Show-ConnectionStatus           | Shows the current DB connection status. |
 | Database         | Show-TableSchema                | Shows the schema for a given table. |
-| Database         | Get-TableSchema                 | Alias for Show-TableSchema. |
-| Database         | Sample-Table                    | Gets a sample of rows from a table. |
 | File System      | Discover-SensitiveData          | Discovers where sensitive data exists (DLP matches). |
 | File System      | Get-OpenShares                  | Finds open shares accessible to broad groups. |
 | File System      | Get-TrusteeAccess               | Finds resources where a trustee has access. |

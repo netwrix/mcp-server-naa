@@ -29,8 +29,8 @@ def connect_database(server: str, database_name: str, username: Optional[str] = 
         # Temporarily override settings
         settings.DB_SERVER = server
         settings.DB_NAME = database_name
-        settings.DB_USER = username
-        settings.DB_PASSWORD = password
+        settings.DB_USER = username if username is not None else settings.DB_USER
+        settings.DB_PASSWORD = password if password is not None else settings.DB_PASSWORD
         settings.DB_USE_WINDOWS_AUTH = trusted_connection
         
         # Use the standard connect() function
