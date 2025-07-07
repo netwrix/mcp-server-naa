@@ -22,6 +22,7 @@ class Settings:
     DB_PASSWORD: str | None = os.getenv("DB_PASSWORD")
     DB_USE_WINDOWS_AUTH: bool = os.getenv("DB_USE_WINDOWS_AUTH", "FALSE").upper() == "TRUE"
     DB_TRUST_SERVER_CERTIFICATE: bool = os.getenv("DB_TRUST_SERVER_CERTIFICATE", "FALSE").upper() == "TRUE"
+    DB_ENCRYPT: bool = os.getenv("DB_ENCRYPT", "TRUE").upper() == "TRUE"
     MCP_AGENT_NAME: str = "NAA_MCP" # Or getenv if needed
 
     def __post_init__(self):
@@ -35,4 +36,4 @@ class Settings:
 settings = Settings()
 settings.__post_init__() # Trigger validation logging
 
-logger.info(f"Configuration loaded: Server={settings.DB_SERVER}, DB={settings.DB_NAME}, WinAuth={settings.DB_USE_WINDOWS_AUTH}, TrustServerCertificate={settings.DB_TRUST_SERVER_CERTIFICATE}")
+logger.info(f"Configuration loaded: Server={settings.DB_SERVER}, DB={settings.DB_NAME}, WinAuth={settings.DB_USE_WINDOWS_AUTH}, TrustServerCertificate={settings.DB_TRUST_SERVER_CERTIFICATE}, Encrypt={settings.DB_ENCRYPT}")

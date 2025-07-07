@@ -58,7 +58,8 @@ def get_query_fingerprint(query: str, max_length: int = 150) -> str:
 
 def connect(server: Optional[str] = None, database: Optional[str] = None, 
            username: Optional[str] = None, password: Optional[str] = None, 
-           trusted_connection: Optional[bool] = None, TrustServerCertificate: bool = False) -> bool:
+           trusted_connection: Optional[bool] = None, trust_server_certificate: bool = False,
+           encrypt: bool = True) -> bool:
     """
     Connects to the MSSQL database using either provided parameters or configuration settings.
     
@@ -68,7 +69,8 @@ def connect(server: Optional[str] = None, database: Optional[str] = None,
         username: Database username (overrides settings.DB_USER if provided)
         password: Database password (overrides settings.DB_PASSWORD if provided)
         trusted_connection: Use Windows Authentication (overrides settings.DB_USE_WINDOWS_AUTH if provided)
-        TrustServerCertificate: Whether to trust the server certificate (overrides settings.DB_TRUST_SERVER_CERTIFICATE if provided)
+        trust_server_certificate: Whether to trust the server certificate (overrides settings.DB_TRUST_SERVER_CERTIFICATE if provided)
+        encrypt: Whether to encrypt the connection (default True)
         
     Returns:
         bool: True on success, raises JsonRpcDBError subclasses on failure.
@@ -86,7 +88,7 @@ def connect(server: Optional[str] = None, database: Optional[str] = None,
     # Use provided parameters or fall back to settings
     server = server or settings.DB_SERVER
     database_name = database or settings.DB_NAME
-    trust_server_certificate = TrustServerCertificate or settings.DB_TRUST_SERVER_CERTIFICATE
+    trust_server_cert = trust_server_certificate or settings.DB_TRUST_SERVER_CERTIFICATE
     
     # --- Configuration Validation ---
     if not server or not database_name:
@@ -107,9 +109,15 @@ def connect(server: Optional[str] = None, database: Optional[str] = None,
             f"DATABASE={database_name}",
             "Timeout=30"
         ]
+        
+        # Add encryption setting
+        if encrypt:
+            connection_string_parts.append("Encrypt=yes")
+        else:
+            connection_string_parts.append("Encrypt=no")
 
         # Add TrustServerCertificate if needed
-        if trust_server_certificate:
+        if trust_server_cert:
             connection_string_parts.append("TrustServerCertificate=yes")
 
         if use_windows_auth:
