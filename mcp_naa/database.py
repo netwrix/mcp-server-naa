@@ -23,40 +23,6 @@ _db_connection: Optional[pyodbc.Connection] = None
 # --- Error classes and constants are now defined in mcp_naa.db_errors ---
 
 
-def sanitize_for_logging(text: str, max_length: int = 200) -> str:
-    """
-    Sanitize text for safe logging to prevent log injection.
-    
-    Args:
-        text: The text to sanitize
-        max_length: Maximum length of the output (default 200)
-    
-    Returns:
-        Sanitized text safe for logging
-    """
-    if not text:
-        return ""
-    
-    # Convert to string if not already
-    text = str(text)
-    
-    # Remove newlines, carriage returns, and tabs to prevent log injection
-    # Replace with spaces to maintain readability
-    sanitized = text.replace('\n', ' ').replace('\r', ' ').replace('\t', ' ')
-    
-    # Remove other control characters
-    sanitized = ''.join(char if ord(char) >= 32 or char in ' \t' else '' for char in sanitized)
-    
-    # Normalize multiple spaces to single space
-    sanitized = re.sub(r'\s+', ' ', sanitized).strip()
-    
-    # Truncate if needed
-    if len(sanitized) > max_length:
-        return sanitized[:max_length] + "..."
-    
-    return sanitized
-
-
 def get_query_fingerprint(query: str, max_length: int = 150) -> str:
     """
     Generate a safe query fingerprint for logging.
@@ -83,8 +49,11 @@ def get_query_fingerprint(query: str, max_length: int = 150) -> str:
     # Email-like patterns
     fingerprint = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', '?@?', fingerprint)
     
-    # Apply general sanitization
-    return sanitize_for_logging(fingerprint, max_length)
+    # Truncate if needed
+    if len(fingerprint) > max_length:
+        return fingerprint[:max_length] + "..."
+    
+    return fingerprint
 
 
 def connect(server: Optional[str] = None, database: Optional[str] = None, 
@@ -126,14 +95,10 @@ def connect(server: Optional[str] = None, database: Optional[str] = None,
         logger.error(f"Configuration Error: {log_issue}. Raising DBConfigurationError.")
         raise DBConfigurationError(err_msg, config_issue=log_issue)
 
-    # Sanitize server and database names for logging
-    safe_server = sanitize_for_logging(server, 100)
-    safe_db_name = sanitize_for_logging(database_name, 100)
-    
     # Determine authentication method
     use_windows_auth = trusted_connection if trusted_connection is not None else settings.DB_USE_WINDOWS_AUTH
     auth_method = "Windows Authentication" if use_windows_auth else "SQL Server Authentication"
-    logger.info(f"Attempting to connect to MSSQL server: {safe_server}, database: {safe_db_name} using {auth_method}")
+    logger.info(f"Attempting to connect to MSSQL server: {server}, database: {database_name} using {auth_method}")
 
     try:
         connection_string_parts = [
@@ -159,9 +124,7 @@ def connect(server: Optional[str] = None, database: Optional[str] = None,
                 connection_string_parts.append(f"UID={db_user}")
                 connection_string_parts.append("PWD=...")  # Placeholder for logging
                 
-                # Sanitize username for logging
-                safe_username = sanitize_for_logging(db_user, 50)
-                logger.info(f"Using SQL Login. User: {safe_username}. Password: [REDACTED]")
+                logger.info(f"Using SQL Login. User: {db_user}. Password: [REDACTED]")
                 
                 # Build final connection string with actual password
                 final_connection_string = ";".join(connection_string_parts).replace(
@@ -177,7 +140,7 @@ def connect(server: Optional[str] = None, database: Optional[str] = None,
             final_connection_string = ";".join(connection_string_parts)
             
         _db_connection = pyodbc.connect(final_connection_string, autocommit=False)
-        logger.info(f"Successfully connected to MSSQL server: {safe_server}, database: {safe_db_name}")
+        logger.info(f"Successfully connected to MSSQL server: {server}, database: {database_name}")
         return True
 
     except pyodbc.Error as e:
@@ -287,8 +250,6 @@ def execute_query(query: str, params: Optional[tuple] = None) -> Tuple[List[pyod
             columns = [column[0] for column in cursor.description]
             rows = cursor.fetchall()
             
-            # Sanitize column names for logging (they could contain injected values)
-            safe_columns = [sanitize_for_logging(col, 50) for col in columns]
             logger.debug(f"SELECT query executed. Column count: {len(columns)}. Rows fetched: {len(rows)}. Cursor rowcount: {row_count}.")
         else:
             try:
@@ -320,9 +281,8 @@ def execute_query(query: str, params: Optional[tuple] = None) -> Tuple[List[pyod
             original_exception=e
         )
         
-        # Log sanitized query fingerprint for debugging
-        safe_context = sanitize_for_logging(f"Query fingerprint: {get_query_fingerprint(query)}", 200)
-        logger.error(f"{query_error.get_log_message()} Context: {safe_context}. Attempting rollback. Raising DBQueryError.", exc_info=False)
+        # Log query fingerprint for debugging
+        logger.error(f"{query_error.get_log_message()} Context: Query fingerprint: {get_query_fingerprint(query)}. Attempting rollback. Raising DBQueryError.", exc_info=False)
         
         try:
             # Check connection validity before rollback
@@ -348,12 +308,9 @@ def execute_query(query: str, params: Optional[tuple] = None) -> Tuple[List[pyod
     except Exception as e:
         client_msg = "An unexpected error occurred while processing the database request."
         
-        # Create safe context for logging
-        safe_query_context = sanitize_for_logging(f"Query fingerprint: {get_query_fingerprint(query)}", 200)
-        
         unexpected_error = DBUnexpectedError(
             client_message=client_msg,
-            context=f"Query execution: {safe_query_context}",
+            context=f"Query execution: Query fingerprint: {get_query_fingerprint(query)}",
             original_exception=e
         )
         logger.error(f"{unexpected_error.get_log_message()} Raising DBUnexpectedError.", exc_info=False)
