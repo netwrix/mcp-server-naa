@@ -1,6 +1,6 @@
-# MCP Server for Netwrix Access Analyzer
+# Netwrix Access Analyzer MCP Server
 
-A FastMCP-based server for Netwrix Access Analyzer data analysis, designed to integrate with Claude Desktop for enhanced data analysis capabilities.
+An MCP server for Netwrix Access Analyzer, designed to integrate with Claude Desktop. Currently supports Active Directory and File System solutions. 
 
 ## Features
 
@@ -21,218 +21,90 @@ This MCP server requires the following dependencies:
 
 ### Netwrix Access Analyzer (NAA) Dependencies
 
-This MCP Server requires Netwrix Access Analyzer (NAA) File System scans to be completed.
-
-## Installation
-
-### System Dependencies
-
-First, ensure you have the ODBC Driver for SQL Server installed:
-
-- **macOS**: Install using Homebrew: `brew install microsoft/mssql-release/msodbcsql17`
-- **Windows**: Download and install from the [Microsoft ODBC Driver page](https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server)
-- **Linux**: Follow [Microsoft's instructions](https://learn.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server) for your distribution
-
-### Python Dependencies
-
-Install required Python packages using `uv`
-
-### Database Setup
-
-For development or testing purposes only: 
-
-1. Create a `.env` file in your project directory with your SQL Server connection details:
-
-```
-# Database Connection Information
-DB_SERVER=your_server_name
-DB_NAME=your_database_name
-DB_USER=your_username
-DB_PASSWORD=your_password
-DB_USE_WINDOWS_AUTH=FALSE     # Set to TRUE to use Windows Authentication
-```
-
-2. Replace the example values with your actual database connection information.
-
-## Integration with Claude Desktop
-
-To make this MCP server available in Claude Desktop:
-
-1. Open Claude Desktop
-2. Navigate to the Claude Desktop configuration file:
-   - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-   - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
-3. Add the following configuration to the `mcpServers` section.   
-4. Restart Claude Desktop
-
-### Example Configuration
-
-```json
-"NetwrixAccessAnalyzer": {
-  "command": "/path/to/your/uv",
-  "args": [
-    "run",
-    "--with",
-    "pyodbc,fastmcp",
-    "fastmcp",
-    "run",
-    "/path/to/mcp/main.py"
-  ],
-  "env": {
-    "DB_SERVER": "your_server_address",
-    "DB_NAME": "your_database_name",
-    "DB_USER": "your_username",
-    "DB_PASSWORD": "your_password",
-    "DB_USE_WINDOWS_AUTH": "FALSE"
-  }
-}
-```
-
-1. Replace `/path/to/your/uv` with the actual path to your `uv` executable (find with `which uv` or `where uv`), and update the path to your `main.py` file as well as the database connection information.
-2. Restart Claude Desktop to apply the changes
-
-## Available Tools and Sample Prompts
-
-The MCP server provides the following tools for interacting with database systems and analyzing access data:
-
-### Database Connection Tools
-
-#### Connect-Database
-
-Connect to a MS SQL Server database.
-
-**Parameters:**
-- `server`: SQL Server address
-- `database`: Database name
-- `username`: SQL Server username (optional if using Windows auth)
-- `password`: SQL Server password (optional if using Windows auth)
-- `trusted_connection`: Boolean flag for Windows Authentication
-
-**Example prompt:**
-"Connect to our SQL Server database at [DBSERVER] with the name [DBNAME] using the [USERNAME] user and [PASSWORD] password."
-
-#### Show-ConnectionStatus
-
-Check the current database connection status.
-
-**Example prompt:**
-"Is the database currently connected? Show me the connection status."
-
-### Data Query and Schema Tools
-
-#### Show-TableSchema
-
-Get a detailed explanation of a database table's schema.
-
-**Parameters:**
-- `table_name`: Name of the table to explain
-
-**Example prompt:**
-"Explain the schema of the Permissions table. What columns does it have?"
-
-#### Get-TableSchema
-
-Retrieves the schema information for a specific table.
-
-**Parameters:**
-- `table_name`: Name of the table to get schema for.
-
-**Example prompt:**
-"Show me the schema for the Users table."
-
-#### Get-TableSample
-
-Retrieves a sample of 10 rows from the specified table.
-
-**Parameters:**
-- `tablename`: Name of the table to sample
-
-**Example prompt:**
-"Give me a sample of 10 rows from the Permissions table."
-
-### Access Analysis Tools
-
-#### Discover-SensitiveData
-
-Identify locations containing sensitive data.
-
-**Example prompt:**
-"Find all shares that contain sensitive data in our environment."
-
-#### Get-TrusteeAccess
-
-Identify where a specific user or group has access.
-
-**Parameters:**
-- `trustee`: Domain\Username format
-- `levelsdown`: How many directory levels to traverse (default: 0)
-
-**Example prompt:**
-"Where does DOMAIN\JohnDoe have access in our file systems?"
-
-#### Get-TrusteePermissionSource
-
-Determine the source of a user's permissions for a specific resource.
-
-**Parameters:**
-- `trustee`: Domain\Username format
-- `resourcepath`: Path to the resource
-
-**Example prompt:**
-"Why does DOMAIN\JaneDoe have access to \\server\share\folder? What's the source of this permission?"
-
-#### Get-ResourceAccess
-
-Show who has access to a specific resource.
-
-**Parameters:**
-- `resource`: Path to the resource
-
-**Example prompt:**
-"Who has access to \\server\finance? Show me all users and groups."
-
-#### Get-UnusedAccess
-
-Find users with unused access to a specific resource.
-
-**Parameters:**
-- `resource`: Path to the resource
-
-**Example prompt:**
-"Find all users who haven't accessed \\server\hr in the last year."
-
-#### Get-ShadowAccess
-
-Find users with shadow access to critical resources.
-
-**Example prompt:**
-"Find all users who have shadow access to credit cards"
-"Find sbcloudlab\admins shadow access"
-
-### Operational Tools
-
-#### Get-RunningJobs
-
-Check currently running Netwrix Access Analyzer jobs.
-
-**Example prompt:**
-"Are there any Access Analyzer jobs running right now? Show me the status."
-
-## Troubleshooting
-
-### Connection Issues
+This MCP Server requires Netwrix Access Analyzer (NAA) File System or Active Directory scans to be completed.
+
+## Available Tools
+
+| Solution         | Tool Name                       | Description |
+|------------------|---------------------------------|-------------|
+| Active Directory | Get-ADEffectiveMembership       | Discovers effective group membership in AD with filters. |
+| Active Directory | Get-ADExceptions                | Retrieves AD exceptions with optional filters. |
+| Active Directory | Get-ADPermissions               | Retrieves AD permissions from the permissions view with filters. |
+| Active Directory | Get-DomainControllers           | Lists domain controllers. |
+| Active Directory | Get-CertificateVulnerabilities  | Lists certificate vulnerabilities. |
+| Active Directory | Get-ADCARights                  | Lists AD CA rights. |
+| Active Directory | Get-ADSecurityAssessment        | Retrieves AD security assessment results. |
+| Active Directory | Get-ADUsers                     | Retrieves AD user details with filters. |
+| Active Directory | Get-ADGroups                    | Retrieves AD group details with filters. |
+| Active Directory | Get-ADComputers                 | Retrieves AD computer details with filters. |
+| Database         | Connect-Database                | Connects to a specified MSSQL database. |
+| Database         | Show-ConnectionStatus           | Shows the current DB connection status. |
+| Database         | Show-TableSchema                | Shows the schema for a given table. |
+| File System      | Discover-SensitiveData          | Discovers where sensitive data exists (DLP matches). |
+| File System      | Get-OpenShares                  | Finds open shares accessible to broad groups. |
+| File System      | Get-TrusteeAccess               | Finds resources where a trustee has access. |
+| File System      | Get-TrusteePermissionSource     | Finds the source of access for a trustee/resource. |
+| File System      | Get-ResourceAccess              | Gets effective access for a resource path. |
+| File System      | Get-UnusedAccess                | Finds users with unused access to a share. |
+| File System      | Get-RunningJobs                 | Lists running Netwrix Access Auditor jobs. |
+| File System      | Get-ShadowAccess                | Retrieves details about shadow access. |
+
+## Installation Instructions (Claude Desktop)
+
+1. **Install Claude Desktop**
+   - Download and install Claude Desktop from the official website: https://claude.ai/download
+   - Follow the installation prompts for your operating system (macOS, Windows, or Linux).
+
+2. **Clone this repository**
+   ```sh
+   git clone https://github.com/netwrix/mcp-server-naa.git
+   cd mcp-server-naa
+   ```
+
+3. **Connect Claude Desktop to this Server**
+   - Add the following [`uv`](https://docs.astral.sh/uv/getting-started/installation/) configuration to your Claude Desktop MCP Configuration:
+    ```
+    "NAA_AD": {
+      "command": "/path/to/uv",
+      "args": [
+        "run",
+        "--with",
+        "pyodbc",
+        "fastmcp",
+        "run",
+        "/path/to/mcp-server-naa/run.py"
+      ],
+      "env": {
+        "DB_SERVER": "HOST OR IP",
+        "DB_NAME": "DATABASENAME",
+        "DB_USER": "USERNAME",
+        "DB_PASSWORD": "PASSWORD",
+        "DB_USE_WINDOWS_AUTH": "FALSE|TRUE"
+      }
+    }
+    ```
+---
+
+---
+# Troubleshooting
+
+## Connection Issues
 
 If you encounter connection issues:
 
-1. Verify your SQL Server is running and accessible from your network
-2. Check your credentials in the `.env` file
+1. Verify your SQL Server is running and accessible from your network   
+2. Check your credentials in the .env file
 3. Ensure the ODBC driver is correctly installed
 4. Check the logs for detailed error messages
 
-### Claude Desktop Integration
+## Claude Desktop Integration
 
-If Claude Desktop can't find the `uv` command:
+If Claude Desktop can't find the uv command:
 
-1. Use the full path to `uv` in your configuration (use `which uv` or `where uv` to find it)
+1. Use the full path to uv in your configuration (use which uv or where uv to find it)
 2. Make sure you've restarted Claude Desktop after configuration changes
 3. Check the Claude logs for any error messages related to the MCP server
+
+## Community
+
+If you need help using this MCP server or understanding your results, just visit the [Netwrix Community](https://community.netwrix.com/) - we’re here to help!
