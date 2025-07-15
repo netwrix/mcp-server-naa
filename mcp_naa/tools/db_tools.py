@@ -7,7 +7,7 @@ import pyodbc
 
 logger = get_logger(__name__)
 
-@app.mcp_agent.tool("Connect-Database")
+@app.mcp.tool("Connect-Database")
 def connect_database(server: str, database_name: str, username: Optional[str] = None,
                      password: Optional[str] = None, trusted_connection: bool = False) -> str:
     """Connects to a specified MSSQL database server, overriding environment settings."""
@@ -46,7 +46,7 @@ def connect_database(server: str, database_name: str, username: Optional[str] = 
         settings.DB_PASSWORD = original_password
         settings.DB_USE_WINDOWS_AUTH = original_windows_auth
 
-@app.mcp_agent.tool("Show-ConnectionStatus")
+@app.mcp.tool("Show-ConnectionStatus")
 def show_connection_status() -> str:
     """Shows the current database connection status."""
     conn = database.get_connection()
@@ -99,7 +99,7 @@ def run_query(query: str) -> str:
         return f"Unexpected error running query: {str(e)}"
 
 
-@app.mcp_agent.tool("Show-TableSchema")
+@app.mcp.tool("Show-TableSchema")
 def explain_table(table_name: str) -> str:
     """Provides the schema definition (columns, types, keys) for a given table."""
     logger.info(f"Tool 'Show-TableSchema' called for table: {table_name}")
@@ -202,7 +202,7 @@ def explain_table(table_name: str) -> str:
         logger.error(f"Unexpected error explaining table '{table_name}': {e}", exc_info=True)
         return f"Unexpected error explaining table: {str(e)}"
 
-@app.mcp_agent.tool()
+@app.mcp.tool()
 def get_table_schema(table_name: str) -> str:
     """Alias for Show-TableSchema. Provides the schema for a given table."""
     # This just calls the other tool function directly.
