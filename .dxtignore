@@ -1,0 +1,8 @@
+__pycache__/
+.claude/
+.ruff_cache/
+.venv/
+build/
+lib/
+scripts/
+*.egg-info/
