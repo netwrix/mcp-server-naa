@@ -18,7 +18,6 @@ class Settings(BaseSettings):
     DB_USE_WINDOWS_AUTH: bool = False
     DB_TRUST_SERVER_CERTIFICATE: bool = False
     DB_ENCRYPT: bool = True
-    MCP_AGENT_NAME: str = "NAA_MCP"
 
 
 # Create a single instance of settings to be imported
