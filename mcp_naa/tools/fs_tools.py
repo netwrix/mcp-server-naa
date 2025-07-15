@@ -23,7 +23,7 @@ def _run_predefined_query(query: str, tool_name: str) -> str:
         logger.error(f"Unexpected error in {tool_name} wrapper: {e}", exc_info=True)
         return f"An unexpected error occurred while preparing the query for {tool_name}."
 
-@app.mcp_agent.tool("Discover-SensitiveData")
+@app.mcp.tool("Discover-SensitiveData")
 def get_sensitive_data() -> str:
     """
     Discovers where sensitive data exists based on DLP matches.
@@ -52,7 +52,7 @@ def get_sensitive_data() -> str:
     return _run_predefined_query(query, tool_name)
 
 
-@app.mcp_agent.tool("Get-OpenShares")
+@app.mcp.tool("Get-OpenShares")
 def get_open_shares() -> str:
     """
     Discovers open shares (accessible to broad groups like 'Everyone' or 'Domain Users').
@@ -87,7 +87,7 @@ def get_open_shares() -> str:
     return _run_predefined_query(query, tool_name)
 
 
-@app.mcp_agent.tool("Get-TrusteeAccess")
+@app.mcp.tool("Get-TrusteeAccess")
 def get_trustee_access(trustee: str, levels_down: int = 0) -> str:
     """
     Finds filesystem resources where a specific trustee (Domain\\Name) has access.
@@ -159,7 +159,7 @@ def get_trustee_access(trustee: str, levels_down: int = 0) -> str:
         return f"Unexpected error getting trustee access: {str(e)}"
 
 
-@app.mcp_agent.tool("Get-TrusteePermissionSource")
+@app.mcp.tool("Get-TrusteePermissionSource")
 def get_permission_source(trustee: str, resource_path: str) -> str:
     """For a given trustee (Domain\\Name) and network resource path (UNC), finds the source of their access."""
     tool_name = "Get-TrusteePermissionSource"
@@ -238,7 +238,7 @@ def get_permission_source(trustee: str, resource_path: str) -> str:
         return f"Unexpected error getting permission source: {str(e)}"
 
 
-@app.mcp_agent.tool("Get-ResourceAccess")
+@app.mcp.tool("Get-ResourceAccess")
 def get_resource_access(resource_path: str) -> str:
     """Gets the effective access list for a specific resource path (UNC)."""
     tool_name = "Get-ResourceAccess"
@@ -303,7 +303,7 @@ def get_resource_access(resource_path: str) -> str:
         return f"Unexpected error getting resource access: {str(e)}"
 
 
-@app.mcp_agent.tool("Get-UnusedAccess")
+@app.mcp.tool("Get-UnusedAccess")
 def get_unused_access(resource_path: str, days_inactive: int = 90) -> str:
     """
     For a specified share path, identifies users whose last activity was more than N days ago (default 90).
@@ -406,7 +406,7 @@ def get_unused_access(resource_path: str, days_inactive: int = 90) -> str:
         logger.error(f"Unexpected error getting unused access for '{resource_path}': {e}", exc_info=True)
         return f"Unexpected error getting unused access: {str(e)}"
 
-@app.mcp_agent.tool("Get-RunningJobs")
+@app.mcp.tool("Get-RunningJobs")
 def get_running_jobs() -> str:
     """Gets currently running Netwrix Access Auditor jobs from SA_JobStatsTbl."""
     tool_name = "Get-RunningJobs"
@@ -420,7 +420,7 @@ def get_running_jobs() -> str:
     return _run_predefined_query(query, tool_name)
 
 
-@app.mcp_agent.tool("Get-ShadowAccess")
+@app.mcp.tool("Get-ShadowAccess")
 def get_shadow_access() -> str:
     """
     Retrieves details about shadow access (potential ungoverned access routes).

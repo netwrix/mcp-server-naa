@@ -8,9 +8,9 @@ logger = logging_config.get_logger(__name__)
 
 # --- Initialize Logging and Config (implicitly via imports) ---
 
-logger.info(f"Initializing MCP agent: {config.settings.MCP_AGENT_NAME}")
-mcp_agent = FastMCP(config.settings.MCP_AGENT_NAME) # Define the agent
-logger.info("MCP agent object created")
+logger.info("Initializing MCP agent")
+mcp = FastMCP("Netwrix Access Analyzer")
+logger.info("MCP server object created")
 
 # --- Register Tools ---
 logger.info("Registering tools...")

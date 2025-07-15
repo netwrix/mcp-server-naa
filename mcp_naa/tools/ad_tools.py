@@ -22,7 +22,7 @@ def _run_predefined_query(query: str, tool_name: str) -> str:
         return f"An unexpected error occurred while preparing the query for {tool_name}."
 
 
-@app.mcp_agent.tool("Get-ADEffectiveMembership")
+@app.mcp.tool("Get-ADEffectiveMembership")
 def get_effective_group_members(
     group_dn_filter: Optional[str] = None,
     group_nt_account_filter: Optional[str] = None,
@@ -128,7 +128,7 @@ def get_effective_group_members(
         logger.error(f"Unexpected error in {tool_name}: {e}", exc_info=True)
         return f"An unexpected error occurred while getting effective memberships: {e}"
 
-@app.mcp_agent.tool("Get-ADExceptions")
+@app.mcp.tool("Get-ADExceptions")
 def get_ad_exceptions(
     name_filter: Optional[str] = None,
     description_filter: Optional[str] = None,
@@ -218,7 +218,7 @@ def get_ad_exceptions(
         logger.error(f"Unexpected error in {tool_name}: {e}", exc_info=True)
         return f"An unexpected error occurred while getting AD exceptions: {e}"
 
-@app.mcp_agent.tool("Get-ADPermissions")
+@app.mcp.tool("Get-ADPermissions")
 def get_ad_permissions(
     # Filters for Access Entry details
     access_entry_type_filter: Optional[str] = None,
@@ -370,7 +370,7 @@ def get_ad_permissions(
         return f"An unexpected error occurred while getting AD permissions: {e}"
 
 
-@app.mcp_agent.tool("Get-DomainControllers")
+@app.mcp.tool("Get-DomainControllers")
 def get_domain_controllers() -> str:
     """
     Retrieves a list of domain controllers from the SA_AD_DCSummary_List view.
@@ -382,7 +382,7 @@ def get_domain_controllers() -> str:
     """
     return _run_predefined_query(query, tool_name)
 
-@app.mcp_agent.tool("Get-CertificateVulnerabilities")
+@app.mcp.tool("Get-CertificateVulnerabilities")
 def get_certificate_vulnerabilities() -> str:
     """
     Retrieves a list of domain controllers from the SA_AD_DCSummary_List view.
@@ -395,7 +395,7 @@ def get_certificate_vulnerabilities() -> str:
     """
     return _run_predefined_query(query, tool_name)
 
-@app.mcp_agent.tool("Get-ADCARights")
+@app.mcp.tool("Get-ADCARights")
 def get_adca_rights() -> str:
     """
     Retrieves a list of domain controllers from the SA_AD_DCSummary_List view.
@@ -415,7 +415,7 @@ def get_adca_rights() -> str:
     """
     return _run_predefined_query(query, tool_name)
 
-@app.mcp_agent.tool("Get-ADSecurityAssessment")
+@app.mcp.tool("Get-ADSecurityAssessment")
 def get_ad_security_assessment() -> str:
     """
     Retrieves results from the Access Analyzer AD Security Assessment
@@ -428,7 +428,7 @@ def get_ad_security_assessment() -> str:
     return _run_predefined_query(query, tool_name)
 
 
-@app.mcp_agent.tool("Get-ADUsers")
+@app.mcp.tool("Get-ADUsers")
 def get_ad_users(
     # --- Identification Filters ---
     domain_id_filter: Optional[str] = None,           # Exact Match (usually numeric)
@@ -664,7 +664,7 @@ def get_ad_users(
 
 # Ensure the rest of the file remains valid
 
-@app.mcp_agent.tool("Get-ADGroups")
+@app.mcp.tool("Get-ADGroups")
 def get_ad_groups(
     # --- Identification Filters ---
     domain_id_filter: Optional[str] = None,           # Exact Match (usually numeric)
@@ -827,7 +827,7 @@ def get_ad_groups(
         logger.error(f"Unexpected error in {tool_name}: {e}", exc_info=True)
         return f"An unexpected error occurred while getting AD groups: {e}"
 
-@app.mcp_agent.tool("Get-ADComputers")
+@app.mcp.tool("Get-ADComputers")
 def get_ad_computers(
     # --- Identification Filters ---
     domain_id_filter: Optional[str] = None,           # Exact Match (usually numeric)
