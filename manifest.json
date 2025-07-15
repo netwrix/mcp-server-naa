@@ -33,7 +33,8 @@
         "DB_NAME": "${user_config.db_name}",
         "DB_USER": "${user_config.db_user}",
         "DB_PASSWORD": "${user_config.db_password}",
-        "DB_USE_WINDOWS_AUTH": "${user_config.db_use_windows_auth}"
+        "DB_USE_WINDOWS_AUTH": "${user_config.db_use_windows_auth}",
+        "DB_TRUST_SERVER_CERTIFICATE": "${user_config.db_trust_server_certificate}"
       }
     }
   },
@@ -610,9 +611,15 @@
     },
     "db_use_windows_auth": {
       "type": "boolean",
-      "title": "Use windows auth",
+      "title": "Use windows authentication",
       "description": "Use windows authentication",
-      "required": true
+      "default": false
+    },
+    "db_trust_server_certificate": {
+      "type": "boolean",
+      "title": "Trust server certificate",
+      "description": "Trust server certificate",
+      "default": false
     }
   },
   "compatibility": {

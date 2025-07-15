@@ -8,7 +8,7 @@ dependencies = [
     "fastmcp>=0.4.1",
     "mcp>=1.6.0",
     "pyodbc>=5.2.0",
-    "python-dotenv>=1.1.0",
+    "pydantic-settings>=2.0.0",
 ]
 license = "MIT"
 
