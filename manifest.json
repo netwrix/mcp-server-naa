@@ -1,0 +1,179 @@
+{
+  "dxt_version": "0.1",
+  "name": "mcp-server-naa",
+  "version": "0.1.0",
+  "display_name": "Netwrix Access Analyzer MCP Server",
+  "description": "Monitor privileged sessions, search history, manage credentials, and track security events",
+  "long_description": "This MCP server provides an integration with Netwrix Privilege Secure, enhancing your Privileged Access Management (PAM) capabilities. It enables AI assistants to monitor active privileged sessions with live screenshots, search command history to identify suspicious activity, and detect credentials requiring rotation.",
+  "author": {
+    "name": "Netwrix Corporation"
+  },
+  "keywords": [
+    "netwrix",
+    "security",
+    "access",
+    "analyzer"
+  ],
+  "license": "MIT",
+  "icon": "assets/icon.png",
+  "server": {
+    "type": "python",
+    "entry_point": "run.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "${__dirname}",
+        "python",
+        "${__dirname}/run.py"
+      ],
+      "env": {
+        "DB_SERVER": "${user_config.db_server}",
+        "DB_NAME": "${user_config.db_name}",
+        "DB_USER": "${user_config.db_user}",
+        "DB_PASSWORD": "${user_config.db_password}",
+        "DB_USE_WINDOWS_AUTH": "${user_config.db_use_windows_auth}"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "get_active_sessions",
+      "description": "Get active activity sessions from Netwrix Privilege Secure",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "get_active_session_image",
+      "description": "Get a live screenshot image for an active session",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "description": "The session ID to retrieve the live image for"
+          }
+        },
+        "required": [
+          "session_id"
+        ]
+      }
+    },
+    {
+      "name": "search_metadata_history",
+      "description": "Search for commands run by users during their sessions in the metadata history",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "search_term": {
+            "type": "string",
+            "description": "The search term to use when searching the metadata history"
+          }
+        },
+        "required": [
+          "search_term"
+        ]
+      }
+    },
+    {
+      "name": "get_admin_credentials_older_than",
+      "description": "Find administrators that have passwords older than the specified number of days",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "type": "integer",
+            "description": "The number of days to look for credentials older than"
+          }
+        },
+        "required": [
+          "days"
+        ]
+      }
+    },
+    {
+      "name": "get_managed_credentials_older_than",
+      "description": "Find all managed passwords that have passwords older than the specified number of days",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "type": "integer",
+            "description": "The number of days to look for credentials older than"
+          }
+        },
+        "required": [
+          "days"
+        ]
+      }
+    },
+    {
+      "name": "get_events_from_server",
+      "description": "Find events that have occurred using search text to filter events",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "search_text": {
+            "type": "string",
+            "description": "The search text to filter events (e.g., 'login failure' for failed logins)"
+          }
+        },
+        "required": [
+          "search_text"
+        ]
+      }
+    },
+    {
+      "name": "get_nps_version",
+      "description": "Get the version of the Netwrix Privilege Secure",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  ],
+  "user_config": {
+    "db_server": {
+      "type": "string",
+      "title": "Dastabase server",
+      "description": "The database host or IP address",
+      "required": true
+    },
+    "db_name": {
+      "type": "string",
+      "title": "Database name",
+      "description": "The database name",
+      "required": true
+    },
+    "db_user": {
+      "type": "string",
+      "title": "Database user",
+      "description": "The database user",
+      "required": true
+    },
+    "db_password": {
+      "type": "string",
+      "title": "Database password",
+      "description": "The database password",
+      "sensitive": true,
+      "required": true
+    },
+    "db_use_windows_auth": {
+      "type": "boolean",
+      "title": "Use windows auth",
+      "description": "Use windows authentication",
+      "required": true
+    }
+  },
+  "compatibility": {
+    "dxt_version": ">=0.1",
+    "runtimes": {
+      "python": ">=3.10"
+    }
+  }
+}
