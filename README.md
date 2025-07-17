@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/netwrix-mcp-server-naa-badge.png)](https://mseep.ai/app/netwrix-mcp-server-naa)
+
 # MCP Server for Netwrix Access Analyzer
 
 A FastMCP-based server for Netwrix Access Analyzer data analysis, designed to integrate with Claude Desktop for enhanced data analysis capabilities.
